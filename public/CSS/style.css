@@ -1,0 +1,123 @@
+body {
+  font-family: "Plus Jakarta Sans", sans-serif !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1;
+}
+
+/* navbar */
+.navbar {
+  height: 4.5rem;
+  background-color: white;
+}
+
+.logo_img {
+  width: 3rem;
+  height: 3rem;
+}
+
+.nav-link {
+  color: #222222 !important;
+}
+
+/* footer */
+.f-info-links a {
+  text-decoration: none;
+  color: #222222;
+}
+
+.f-info-links a:hover {
+  text-decoration: underline;
+}
+
+.f-info-links,
+.f-info-socials,
+.f-info-brand {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.f-info-socials i {
+  font-size: 1.2rem;
+  margin-right: 1rem;
+}
+
+.f-info {
+  text-align: center;
+  height: 8rem;
+  background-color: #ebebeb;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* cards */
+.listing-card {
+  border: none !important;
+  margin-bottom: 2rem;
+  display: inline-block; /* Makes the card behave as a block */
+  break-inside: avoid; /* Prevents the card from splitting between columns */
+}
+
+.card-img-top {
+  border-radius: 1rem !important;
+  width: 100% !important;
+  object-fit: cover !important;
+}
+
+.card-body {
+  padding: 0 !important;
+  font-weight: 400 !important;
+}
+
+.listing-link {
+  text-decoration: none;
+}
+
+/* card Effect */
+.card-img-overlay {
+  opacity: 0;
+}
+
+.card-img-overlay:hover {
+  opacity: 0.2;
+  background-color: white;
+}
+
+/* new.ejs */
+.add-btn {
+  background-color: #fe424d !important;
+  border: none !important;
+  margin-bottom: 2rem;
+}
+
+/* edit.ejs */
+.edit-btn {
+  background-color: #fe424d !important;
+  border: none !important;
+  margin-bottom: 2rem;
+  width: 5rem !important;
+}
+
+/* show.ejs */
+.show-img {
+  height: 30vh;
+}
+
+
+.show-card {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* map */
+#map {
+  height: 18rem;
+  width: auto;
+}

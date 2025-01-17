@@ -1,0 +1,261 @@
+<% layout("/layouts/boilerplate.ejs") -%>
+<style>
+   .btns {
+    display: flex;
+    width:  50rem;
+}
+
+#shareBtn{
+  display: flex;
+  width: 5.5rem;
+  height: 2.3rem;
+}
+
+
+@media(max-width:525px){
+  .ShareListing{
+    font-size: 0.6rem;
+    margin: 0.1rem !important;
+  }
+}
+
+@media(max-width:415px){
+  .links{
+    display: inline !important;
+  }
+}
+
+@media (max-width: 362px){
+  .btnStyle{
+    font-size:x-small !important;
+  }
+  #shareBtn{
+  height: 2.1rem;
+}
+}
+
+@media (max-width: 295px){
+  .btnStyle{
+    margin-top: 1rem;
+  }
+  .btns{
+    display: block !important;
+  }  
+}
+
+</style>
+
+
+<script>
+  const mapToken = "<%= process.env.MAP_TOKEN %>";
+  const listing = <%- JSON.stringify(listing) %>;
+</script>
+<div class="row mt-3">
+  <div class="col-8 offset-lg-2">
+    <h3><%= listing.title %></h3>
+  </div>
+
+  <div class="card col-lg-8 offset-lg-2 show-card listing-card">
+    <img
+      src="<%= listing.image.url %>"
+      class="card-img-top show-img"
+      alt="listing_image"
+      style="height: 18rem"
+    />
+    <div class="card-body">
+      <p class="card-text"></p>
+      <p>Owned by <i><%= listing.owner.username %></i></p>
+      <p><%= listing.description %></p>
+      <p>&#8377;<%= listing.price.toLocaleString("en-IN") %></p>
+      <p><%= listing.location %></p>
+      <p><%= listing.country %></p>
+    </div>
+  </div>
+
+  
+  <div class="btns col-lg-6 offset-lg-2">
+    <button id="shareBtn" class="btnStyle btn btn-primary ms-2 me-2     ms-lg-5 me-lg-5">
+      <i class="fas fa-share"></i> Share
+    </button>
+    <% if(currUser && currUser._id.equals(listing.owner._id)){%>
+    <form method="get" action="/listings/<%= listing._id %>/edit">
+      <button style="background-color: #fe424d;" class="btnStyle btn btn-dark ms-2 me-2 pe-4 ps-4  me-lg-5">Edit</button>
+    </form>
+    <form method="post" action="/listings/<%= listing._id %>?_method=Delete">
+      <button class="btnStyle btn btn-dark ms-2 me-2">Delete</button>
+    </form>
+  <% } %>
+  </div>
+
+  
+
+
+  <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="shareModalLabel">Share Your Listing</h5>
+          <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Select a platform to share your listing:</p>
+          <div class="d-flex links justify-content-around">
+            <a id="facebookShare" href="#" class="btn ShareListing btn-primary m-2"><i class="fab fa-facebook"></i> Facebook</a>
+            <a id="twitterShare" href="#" class="btn ShareListing btn-info m-2"><i class="fab fa-twitter"></i> Twitter</a>
+            <a id="whatsappShare" href="#" class="btn ShareListing btn-success m-2"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+            <a id="copyLinkShare" href="#" class="btn ShareListing btn-secondary m-2"><i class="fas fa-copy"></i> Copy Link</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="col-lg-8 offset-lg-2 mb-3">
+    <% if(currUser){ %>
+    <hr />
+    <h4>Leave a Review</h4>
+    <form
+      method="post"
+      action="/listings/<%= listing._id %>/reviews"
+      novalidate
+      class="needs-validation"
+    >
+      <div class="mb-1 mt-3">
+        <label class="form-lable">Rating</label>
+        <fieldset class="starability-slot">
+          <input
+            type="radio"
+            id="no-rate"
+            class="input-no-rate"
+            name="review[rating]"
+            value="1"
+            checked
+            aria-label="No rating."
+          />
+          <input
+            type="radio"
+            id="first-rate1"
+            name="review[rating]"
+            value="1"
+          />
+          <label for="first-rate1" title="Terrible">1 star</label>
+          <input
+            type="radio"
+            id="first-rate2"
+            name="review[rating]"
+            value="2"
+          />
+          <label for="first-rate2" title="Not good">2 stars</label>
+          <input
+            type="radio"
+            id="first-rate3"
+            name="review[rating]"
+            value="3"
+          />
+          <label for="first-rate3" title="Average">3 stars</label>
+          <input
+            type="radio"
+            id="first-rate4"
+            name="review[rating]"
+            value="4"
+          />
+          <label for="first-rate4" title="Very good">4 stars</label>
+          <input
+            type="radio"
+            id="first-rate5"
+            name="review[rating]"
+            value="5"
+          />
+          <label for="first-rate5" title="Amazing">5 stars</label>
+        </fieldset>
+      </div>
+
+      <div class="mb-3">
+        <label for="comment" class="form-lable">Comments</label>
+        <textarea
+          name="review[comment]"
+          id="comment"
+          cols="38"
+          rows="5"
+          class="form-control"
+          required
+        ></textarea>
+        <div class="invalid-feedback">please Add some comments for review</div>
+      </div>
+      <button class="btn btn-outline-dark">Submit</button>
+    </form>
+    <hr />
+    <% } %> <% if(listing.reviews.length > 0){ %>
+    <p><b>All Reviews</b></p>
+    <div class="row">
+      <% for(review of listing.reviews){ %>
+      <div
+        class="card col-lg-8 offset-lg-2 offset-sm-2 col-sm-8 offset-1 col-10 mt-3"
+      >
+        <div class="card-body">
+          <h6 class="card-title">@<%= review.author.username %></h6>
+          <p
+            class="starability-result card-text"
+            data-rating="<%= review.rating %>"
+          ></p>
+          <p class="card-text"><%= review.comment %></p>
+           <% if(currUser){ %>
+             <% if(currUser._id.equals(review.author._id)){ %>
+             <form
+               class="mb-3"
+               method="post"
+               action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+             >
+             <button class="btn btn-sm btn-dark">Delete</button>
+             </form>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+  <div class="col-lg-8 offset-lg-2 mb-3">
+    <h3>Where you'll be</h3>
+    <div id="map"></div>
+  </div>
+</div>
+
+<script src="/js/map.js"></script>
+
+<script>
+  document.getElementById('shareBtn').addEventListener('click', () => {
+  const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+  shareModal.show();
+
+  // Replace with your actual listing URL
+  const listingUrl = window.location.href;
+
+  // Generate sharing links
+  document.getElementById('facebookShare').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(listingUrl)}`;
+  document.getElementById('twitterShare').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(listingUrl)}&text=Check%20out%20this%20amazing%20listing!`;
+  document.getElementById('whatsappShare').href = `https://wa.me/?text=${encodeURIComponent('Check out this amazing listing: ' + listingUrl)}`;
+
+  // Copy to clipboard functionality
+  document.getElementById('copyLinkShare').addEventListener('click', () => {
+    navigator.clipboard.writeText(listingUrl).then(() => {
+      alert('Link copied to clipboard!');
+    });
+  });
+});
+
+</script>
+
+
+
+
+<!-- <a
+      href="/listings/<%= listing._id %>/edit"
+      class="btn btn-dark edit-btn"
+      >Edit</a
+    > -->

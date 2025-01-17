@@ -1,0 +1,96 @@
+<% layout("/layouts/boilerplate.ejs") -%>
+
+    <div class="row mt-3">
+        <div class="col-lg-8 offset-lg-2 offset-sm-2 col-sm-8 offset col-12">
+            <h3>Create a new listing</h3>
+            <form method="POST" action="/listings" class="needs-validation" novalidate enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="title" class="form-lable">Title</label>
+                    <input id="title" name="listing[title]" placeholder="Add a catchy title" type="text" class="form-control" required />
+                    <div class="valid-feedback">Looks good!</div>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-lable">Description</label>
+                    <textarea id="description" name="listing[description]" type="text" class="form-control" required></textarea>
+                    <div class="invalid-feedback">Description is required</div>
+                </div>
+                <div class="mb-3">
+                    <label for="image" class="form-lable">Upload Listing Image</label>
+                    <input id="image" name="listing[image]" type="file" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label for="categories" class="form-label">Categories</label>
+                    <input id="categories" name="listing[categories]" type="text" class="form-control" data-bs-toggle="dropdown" placeholder="Select Categories" required onkeydown="return false;" />
+                    <div class="invalid-feedback">Category is required</div>
+                    <div class="dropdown">
+                        <ul class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Trending</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Rooms</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Cities</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Mountains</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Castles</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Pools</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Camping</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Farms</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Arctic</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Forest</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Ship</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Home</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Igloo</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item category-option" href="#">Cinematic</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="mb-3 col-md-4">
+                        <label for="price" class="form-lable">Price</label>
+                        <input id="price" name="listing[price]" placeholder="1200" class="form-control" required />
+                        <div class="invalid-feedback">Price is Required</div>
+                    </div>
+                    <div class="mb-3 col-md-8">
+                        <label for="country" class="form-lable">Country</label>
+                        <input id="country" name="listing[country]" placeholder="india" class="form-control" required />
+                        <div class="invalid-feedback">Country Must be valid</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="location" class="form-lable">Location</label>
+                    <input id="location" name="listing[location]" placeholder="Hauz Khas, Delhi" class="form-control" required />
+                    <div class="invalid-feedback">Location Must be valid</div>
+                </div>
+
+                <button class="btn btn-dark add-btn mt-3">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/categories.js"></script>
