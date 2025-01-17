@@ -39,7 +39,7 @@ const sendOtpEmail = async(email, username, otp) => {
           Need help? Contact us at 
           <a href="mailto:ruralrentals.in@gmail.com" style="color: #4CAF50; text-decoration: none;">ruralrentals.in@gmail.com</a>
         </p>
-        <p>Visit us at <a href="https://wanderlust-alp9.onrender.com/" style="color: #4CAF50; text-decoration: none;">www.RuralRentals.com</a></p>
+        <p>Visit us at <a href="https://ruralrentals.onrender.com/" style="color: #4CAF50; text-decoration: none;">www.RuralRentals.com</a></p>
       </div>
     </div>
     `
