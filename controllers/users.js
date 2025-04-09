@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const passport = require("passport");
 const User = require("../models/user");
 const { sendVerificationEmail } = require("../utils/verifyEmail");
 const { sendOtpEmail } = require("../utils/otpEmail");
@@ -9,36 +10,49 @@ module.exports.renderSignupForm = (req, res) => {
 };
 
 module.exports.signupUser = async(req, res, next) => {
-    let host = req.headers.host;
     try {
         let { email, username, password } = req.body;
 
-        const existingUser = await User.findOne({ email: email });
-        if (existingUser) {
-            req.flash("Error", "Email is already registered");
-            res.redirect("/users/signup");
-            return;
+        // Validate input
+        if (!email || !username || !password) {
+            req.flash("error", "All fields are required");
+            return res.redirect("/users/signup");
         }
 
-        req.session.tempUserData = { email, username, password };
+        // Check if user already exists
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            req.flash("error", "Email is already registered");
+            return res.redirect("/users/signup");
+        }
 
-        const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-            expiresIn: "1h",
+        // Create new user
+        const newUser = new User({
+            email: email.toLowerCase(),
+            username: username
         });
-        const verificationLink = `http://${host}/verify-email?token=${token}`;
 
+        // Register user with passport-local-mongoose
+        const registeredUser = await User.register(newUser, password);
+
+        // Generate verification token
+        const verificationToken = registeredUser.generateVerificationToken();
+        await registeredUser.save();
+
+        // Send verification email
+        const verificationLink = `${req.protocol}://${req.get('host')}/users/verify-email?token=${verificationToken}`;
+        
         try {
             await sendVerificationEmail(email, verificationLink);
-            req.flash("Success", "Check your mail-box & Verify your email");
-            res.redirect("/listings");
+            req.flash("success", "Please check your email to verify your account");
+            res.redirect("/users/login");
         } catch (err) {
-            delete req.session.tempUserData;
-            req.flash("Error", "Fail to send verification mail");
+            console.error("Email sending error:", err);
+            req.flash("error", "Failed to send verification email");
             res.redirect("/users/signup");
-            return;
         }
     } catch (err) {
-        delete req.session.tempUserData;
+        console.error("Signup error:", err);
         req.flash("error", err.message);
         res.redirect("/users/signup");
     }
@@ -46,59 +60,34 @@ module.exports.signupUser = async(req, res, next) => {
 
 module.exports.verifyUserEmail = async(req, res, next) => {
     const { token } = req.query;
-    const tempUser = req.session.tempUserData;
 
     if (!token) {
-        req.flash("Error", "Token is missing.");
+        req.flash("error", "Invalid verification link");
         return res.redirect("/users/signup");
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Check if the user is already verified
-        const existingUser = await User.findOne({ email: decoded.email });
-        if (existingUser && existingUser.isVerified) {
-            await req.login(existingUser, (err) => {
-                if (err) {
-                    return next(err);
-                }
-                req.flash("Success", "--Email is Verified-- Welcome to the RuralRentals");
-                res.redirect("/listings");
-            });
-            return;
-        }
-
-        // Check for tempUser in session
-        if (!tempUser || tempUser.email !== decoded.email) {
-            delete req.session.tempUser;
-            req.flash("Error", "Invalid or expired token.");
-            res.redirect("/users/signup");
-            return;
-        }
-
-        const password = tempUser.password;
-
-        const newUser = new User({
-            username: tempUser.username,
-            email: tempUser.email,
-            isVerified: true,
+        const user = await User.findOne({
+            verificationToken: token,
+            verificationTokenExpires: { $gt: Date.now() }
         });
 
-        delete req.session.tempUser; // Ensure cleanup
+        if (!user) {
+            req.flash("error", "Invalid or expired verification link");
+            return res.redirect("/users/signup");
+        }
 
-        let registerUser = await User.register(newUser, password);
+        // Verify user
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpires = undefined;
+        await user.save();
 
-        await req.login(registerUser, (err) => {
-            if (err) {
-                return next(err);
-            }
-            req.flash("Success", "--Email is Verified-- Welcome to the RuralRentals");
-            res.redirect("/listings");
-        });
+        req.flash("success", "Email verified successfully! You can now login");
+        res.redirect("/users/login");
     } catch (err) {
-        delete req.session.tempUser;
-        req.flash("error", err.message);
+        console.error("Verification error:", err);
+        req.flash("error", "Error verifying email");
         res.redirect("/users/signup");
     }
 };
@@ -107,10 +96,34 @@ module.exports.renderLoginForm = (req, res) => {
     res.render("users/login.ejs");
 };
 
-module.exports.loginUser = async(req, res) => {
-    req.flash("Success", "Welcome back to the wanderLust!");
-    let redirectUrl = res.locals.redirectUrl || "/listings";
-    res.redirect(redirectUrl);
+module.exports.loginUser = async(req, res, next) => {
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            req.flash("error", "Invalid username or password");
+            return res.redirect("/users/login");
+        }
+
+        if (!user.isVerified) {
+            req.flash("error", "Please verify your email first");
+            return res.redirect("/users/login");
+        }
+
+        passport.authenticate("local", {
+            failureRedirect: "/users/login",
+            failureFlash: true
+        })(req, res, () => {
+            req.flash("success", "Welcome back!");
+            const redirectUrl = res.locals.redirectUrl || "/listings";
+            res.redirect(redirectUrl);
+        });
+    } catch (err) {
+        console.error("Login error:", err);
+        req.flash("error", "Error during login");
+        res.redirect("/users/login");
+    }
 };
 
 module.exports.logoutUser = (req, res, next) => {
